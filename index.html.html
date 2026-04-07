@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>访客 WiFi 凭证</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: #f5f6f8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px 24px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+    .header p {
+      font-size: 13px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      padding: 24px 20px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+
+    .wifi-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
+      margin-bottom: 16px;
+    }
+    .wifi-icon {
+      width: 36px;
+      height: 36px;
+      background: #ebf3ff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .wifi-label {
+      font-size: 12px;
+      color: #999;
+    }
+    .wifi-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .field {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .field:last-of-type {
+      border-bottom: none;
+    }
+    .field-left {
+      flex: 1;
+    }
+    .field-label {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 2px;
+    }
+    .field-value {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1a1a1a;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      flex-shrink: 0;
+      margin-left: 12px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: #2d6ef0;
+      background: #ebf1ff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .copy-btn:active { background: #d0e0ff; }
+    .copy-btn.copied {
+      color: #27ae60;
+      background: #e6f9ee;
+    }
+
+    .countdown-box {
+      margin-top: 16px;
+      background: #fff8ed;
+      border: 1px solid #ffe5a0;
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .countdown-label {
+      font-size: 13px;
+      color: #b07d00;
+    }
+    .countdown-timer {
+      font-size: 16px;
+      font-weight: 700;
+      color: #d48000;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 1px;
+    }
+    .countdown-timer.urgent {
+      color: #e53935;
+    }
+
+    .disclaimer {
+      margin-top: 16px;
+      padding: 12px 14px;
+      background: #f8f8f8;
+      border-left: 3px solid #d0d0d0;
+      border-radius: 0 8px 8px 0;
+      font-size: 11.5px;
+      color: #888;
+      line-height: 1.7;
+    }
+    .disclaimer strong {
+      color: #666;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(0,0,0,0.72);
+      color: #fff;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+  </div>
+
+  <div class="card">
+
+    <!-- WiFi 名称 -->
+    <div class="wifi-name">
+      <div>
+        <div class="wifi-label">WiFi 名称</div>
+        <div class="wifi-value">lixiang-guest</div>
+      </div>
+    </div>
+
+    <!-- 账号 -->
+    <div class="field">
+      <div class="field-left">
+        <div class="field-label">账号</div>
+        <div class="field-value" id="accountVal">188****8888</div>
+      </div>
+      <button class="copy-btn" id="copyAccount" onclick="copyField('accountVal','copyAccount')">复制</button>
+    </div>
+
+    <!-- 密码 -->
+    <div class="field">
+      <div class="field-left">
+        <div class="field-label">密码</div>
+        <div class="field-value" id="passwordVal">Lx@2025abcd</div>
+      </div>
+      <button class="copy-btn" id="copyPassword" onclick="copyField('passwordVal','copyPassword')">复制</button>
+    </div>
+
+    <!-- 倒计时 -->
+    <div class="countdown-box">
+      <span class="countdown-label">凭证有效期</span>
+      <span class="countdown-timer" id="countdown">剩余 12:00:00</span>
+    </div>
+
+    <!-- 免责声明 -->
+    <div class="disclaimer">
+      <strong>温馨提示：</strong>访客入网账号及密码仅限本人使用，严禁转借、共享或泄露。因账号使用不当、违规转借等行为引发的一切安全风险与法律责任，由使用者自行承担。
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ── 模拟数据（实际由后端接口注入） ──────────────────────────────
+    const WIFI_CONFIG = {
+      account:  "188****8888",   // 替换为手机号
+      password: "Lx@2025abcd",   // 替换为飞连返回的密码
+      expireAt: Date.now() + 12 * 60 * 60 * 1000  // 12 小时后过期
+    };
+
+    // 渲染账号密码
+    document.getElementById("accountVal").textContent  = WIFI_CONFIG.account;
+    document.getElementById("passwordVal").textContent = WIFI_CONFIG.password;
+
+    // ── 倒计时 ────────────────────────────────────────────────────────
+    function updateCountdown() {
+      const remaining = WIFI_CONFIG.expireAt - Date.now();
+      const el = document.getElementById("countdown");
+
+      if (remaining <= 0) {
+        el.textContent = "凭证已过期";
+        el.classList.add("urgent");
+        return;
+      }
+
+      const totalSec = Math.floor(remaining / 1000);
+      const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
+      const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, "0");
+      const s = String(totalSec % 60).padStart(2, "0");
+
+      el.textContent = `剩余 ${h}:${m}:${s}`;
+      el.classList.toggle("urgent", totalSec < 600); // 不足 10 分钟变红
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // ── 复制功能 ──────────────────────────────────────────────────────
+    function copyField(valueId, btnId) {
+      const text = document.getElementById(valueId).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById(btnId);
+        const original = btn.textContent;
+        btn.textContent = "已复制";
+        btn.classList.add("copied");
+        showToast("已复制到剪贴板");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 2000);
+      }).catch(() => {
+        // 兼容旧版浏览器
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showToast("已复制到剪贴板");
+      });
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 1800);
+    }
+  </script>
+
+</body>
+</html>
